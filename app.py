@@ -4,7 +4,6 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'lathe-cloud-secure-key'
-# Render needs async_mode='eventlet' or 'gevent' for WebSockets on the free tier
 socketio = SocketIO(app, cors_allowed_origins='*', async_mode='eventlet')
 
 # In-memory storage for the latest packet sent by the Pi
@@ -15,40 +14,7 @@ latest_data = {
     "last_seen": 0.0  # Epoch timestamp
 }
 
-@app.route('/api/push', methods=['POST'])
-def receive_data():
-    """Endpoint for the Raspberry Pi to post live sensor payloads."""
-    global latest_data
-    payload = request.get_json(silent=True)
-    if not payload:
-        return jsonify({"error": "Invalid JSON payload"}), 400
-    
-    # Update latest storage and stamp it with current cloud time
-    latest_data.update(payload)
-    latest_data["last_seen"] = time.time()
-    
-    # Immediately broadcast the updated state to all open browser windows
-    socketio.emit('cloud_update', latest_data)
-    return jsonify({"status": "delivered", "timestamp": latest_data["last_seen"]})
-
-@app.route('/api/status', methods=['GET'])
-def get_status():
-    """Helper endpoint to check current variables via standard HTTP request."""
-    return jsonify(latest_data)
-
-@app.route('/')
-def index():
-    return render_template_string(PAGE_TEMPLATE)
-
-# --- We will insert the giant HTML string here in the next step ---
-
-if __name__ == '__main__':
-    # Render binds automatically to the PORT environment variable
-    import os
-    port = int(os.environ.get("PORT", 5000))
-    socketio.run(app, host='0.0.0.0', port=port)
-
-    # Paste this at the absolute bottom of app.py
+# We put the HTML template UP HERE so Python reads it before starting the server
 PAGE_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,7 +49,6 @@ PAGE_TEMPLATE = r"""<!DOCTYPE html>
         
         socket.on('cloud_update', (data) => {
             const now = Math.floor(Date.now() / 1000);
-            // If data is older than 5 seconds, consider the machine offline
             if (now - data.last_seen > 5) {
                 document.getElementById('statusBadge').className = "status offline";
                 document.getElementById('statusBadge').innerText = "MACHINE OFFLINE";
@@ -100,3 +65,31 @@ PAGE_TEMPLATE = r"""<!DOCTYPE html>
 </body>
 </html>
 """
+
+@app.route('/api/push', methods=['POST'])
+def receive_data():
+    """Endpoint for the Raspberry Pi to post live sensor payloads."""
+    global latest_data
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"error": "Invalid JSON payload"}), 400
+    
+    latest_data.update(payload)
+    latest_data["last_seen"] = time.time()
+    
+    socketio.emit('cloud_update', latest_data)
+    return jsonify({"status": "delivered", "timestamp": latest_data["last_seen"]})
+
+@app.route('/api/status', methods=['GET'])
+def get_status():
+    """Helper endpoint to check current variables via standard HTTP request."""
+    return jsonify(latest_data)
+
+@app.route('/')
+def index():
+    return render_template_string(PAGE_TEMPLATE)
+
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host='0.0.0.0', port=port)
