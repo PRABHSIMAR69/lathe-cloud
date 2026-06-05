@@ -30,9 +30,15 @@ def receive_data():
     stored_snapshot["history"] = payload.get("history", stored_snapshot["history"])
     stored_snapshot["last_seen"] = time.time()
     
-    # Mirror everything directly to all open browsers
+# Mirror everything directly to all open browsers
     socketio.emit('update', stored_snapshot)
     return jsonify({"status": "synced", "cloud_time": stored_snapshot["last_seen"]})
+
+@app.route('/api/latest', methods=['GET'])
+def get_latest():
+    return jsonify(stored_snapshot)
+
+@app.route('/')
 
 @app.route('/')
 def index():
