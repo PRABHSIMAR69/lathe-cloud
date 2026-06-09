@@ -133,12 +133,7 @@ main{flex:1;padding:20px;max-width:1400px;margin:0 auto;width:100%;}
 </head>
 <body>
 
-<div id="offlineOverlay" class="offline-overlay">
-    <div class="offline-box">
-        <div class="offline-title">🔥 LATHE OFFLINE</div>
-        <p class="offline-text">The edge device is powered down or disconnected from the cloud network. Displaying last cached state.</p>
-    </div>
-</div>
+
 
 <div class="app">
     <header class="header">
