@@ -248,19 +248,20 @@ sock.on('disconnect', () => {
     $('#connTxt').textContent = "Reconnecting..."; 
 });
 
+let _lastUpdate = 0;
+
 sock.on('update', snap => {
-    const now = Math.floor(Date.now() / 1000);
-    // If the snapshot has no data or has not been updated in 6 seconds, trigger the blur blocker
-    if (!snap.last_seen || (now - snap.last_seen > 6)) {
-        $('#offlineOverlay').classList.remove('hidden');
-        return;
-    }
-    
-    // Hide blocker and populate data
+    _lastUpdate = Date.now();
     $('#offlineOverlay').classList.add('hidden');
     renderLatest(snap.latest);
     if (__charts && snap.history) { applyHistory(snap.history); }
 });
+
+setInterval(() => {
+    if (_lastUpdate > 0 && (Date.now() - _lastUpdate > 10000)) {
+        $('#offlineOverlay').classList.remove('hidden');
+    }
+}, 3000);
 
 const fmt = (v, d=1) => (v == null || isNaN(v)) ? '--' : Number(v).toFixed(d);
 
