@@ -274,7 +274,7 @@ function renderLatest(L) {
     $('#thdVal').textContent  = fmt(L.thd, 2);
     
     $('#tempBar').style.width = Math.min(100, (L.temp / 80)*100) + '%';
-    $('#rpmBar').style.width = Math.min(100, (L.rpm / 1200)*100) + '%';
+    $('#rpmBar').style.width = Math.min(100, ((window._lastRpm || L.rpm) / 1200)*100) + '%';
     $('#curBar').style.width = Math.min(100, (L.current / 5)*100) + '%';
     $('#voltBar').style.width = Math.min(100, (L.voltage / 260)*100) + '%';
     $('#thdBar').style.width = Math.min(100, (L.thd / 15)*100) + '%';
