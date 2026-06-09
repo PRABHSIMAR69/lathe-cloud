@@ -267,7 +267,8 @@ const fmt = (v, d=1) => (v == null || isNaN(v)) ? '--' : Number(v).toFixed(d);
 
 function renderLatest(L) {
     $('#tempVal').textContent = fmt(L.temp, 1);
-    $('#rpmVal').textContent  = fmt(L.rpm, 0);
+    if (L.motor_on && L.rpm > 0) window._lastRpm = L.rpm;
+    $('#rpmVal').textContent  = L.motor_on ? fmt(window._lastRpm || L.rpm, 0) : '0';
     $('#curVal').textContent  = fmt(L.current, 2);
     $('#voltVal').textContent = fmt(L.voltage, 1);
     $('#thdVal').textContent  = fmt(L.thd, 2);
