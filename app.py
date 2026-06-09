@@ -245,18 +245,23 @@ sock.on('disconnect', () => {
 
 let _lastUpdate = 0;
 
-sock.on('update', snap => {
-    _lastUpdate = Date.now();
-    $('#offlineOverlay').classList.add('hidden');
-    renderLatest(snap.latest);
-    if (__charts && snap.history) { applyHistory(snap.history); }
-});
-
-setInterval(() => {
-    if (_lastUpdate > 0 && (Date.now() - _lastUpdate > 10000)) {
-        $('#offlineOverlay').classList.remove('hidden');
+async function fetchLatest() {
+    try {
+        const res = await fetch('/api/latest');
+        const snap = await res.json();
+        _lastUpdate = Date.now();
+        $('#connDot').style.background = '#9ae6b4';
+        $('#connTxt').textContent = 'Cloud Active';
+        renderLatest(snap.latest);
+        if (__charts && snap.history) { applyHistory(snap.history); }
+    } catch(e) {
+        $('#connDot').style.background = '#fc8181';
+        $('#connTxt').textContent = 'Reconnecting...';
     }
-}, 3000);
+}
+
+fetchLatest();
+setInterval(fetchLatest, 2000);
 
 const fmt = (v, d=1) => (v == null || isNaN(v)) ? '--' : Number(v).toFixed(d);
 
