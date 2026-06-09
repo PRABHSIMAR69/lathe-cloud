@@ -247,7 +247,7 @@ let _lastUpdate = 0;
 
 async function fetchLatest() {
     try {
-        const res = await fetch('/api/latest');
+        const res = await fetch('/api/latest?t=' + Date.now());
         const snap = await res.json();
         _lastUpdate = Date.now();
         $('#connDot').style.background = '#9ae6b4';
