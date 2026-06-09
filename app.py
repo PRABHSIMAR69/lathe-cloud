@@ -249,7 +249,12 @@ async function fetchLatest() {
     try {
         const res = await fetch('/api/latest?t=' + Date.now());
         const snap = await res.json();
-        _lastUpdate = Date.now();
+        const serverAge = Date.now() - (snap.last_seen * 1000);
+        if (serverAge > 15000) {
+            _lastUpdate = 0;
+        } else {
+            _lastUpdate = Date.now();
+        }
         $('#connDot').style.background = '#9ae6b4';
         $('#connTxt').textContent = 'Cloud Active';
         renderLatest(snap.latest);
