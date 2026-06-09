@@ -280,8 +280,13 @@ function renderLatest(L) {
     $('#thdBar').style.width = Math.min(100, (L.thd / 15)*100) + '%';
     
     const mb = $('#motorBadge');
-    mb.textContent = L.motor_on ? 'RUNNING' : 'IDLE';
-    mb.className = 'badge ' + (L.motor_on ? 'badge--on' : 'badge--off');
+    if (L.voltage < 50) {
+        mb.textContent = 'MACHINE OFF';
+        mb.className = 'badge badge--off';
+    } else {
+        mb.textContent = L.motor_on ? 'RUNNING' : 'IDLE';
+        mb.className = 'badge ' + (L.motor_on ? 'badge--on' : 'badge--off');
+    }
     
     if(L.alerts && L.alerts.length) {
         $('#alertBanner').classList.add('on');
