@@ -251,12 +251,15 @@ async function fetchLatest() {
     try {
         const res = await fetch('/api/latest?t=' + Date.now());
         const snap = await res.json();
-        const serverAge = snap.server_age_ms || 0;
-        if (serverAge > 15000) {
-            _lastUpdate = 0;
-        } else {
-            _lastUpdate = Date.now();
+        if ((snap.server_age_ms || 999999) > 15000) {
+            $('#connDot').style.background = '#fc8181';
+            $('#connTxt').textContent = 'Machine Offline';
+            const mb = $('#motorBadge');
+            mb.textContent = 'MACHINE OFF';
+            mb.className = 'badge badge--off';
+            return;
         }
+        _lastUpdate = Date.now();
         $('#connDot').style.background = '#9ae6b4';
         $('#connTxt').textContent = 'Cloud Active';
         renderLatest(snap.latest);
