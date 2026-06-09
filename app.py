@@ -36,7 +36,9 @@ def receive_data():
 
 @app.route('/api/latest', methods=['GET'])
 def get_latest():
-    return jsonify(stored_snapshot)
+    snap = dict(stored_snapshot)
+    snap['server_age_ms'] = int((time.time() - stored_snapshot['last_seen']) * 1000)
+    return jsonify(snap)
 
 @app.route('/')
 
@@ -249,7 +251,7 @@ async function fetchLatest() {
     try {
         const res = await fetch('/api/latest?t=' + Date.now());
         const snap = await res.json();
-        const serverAge = Date.now() - (snap.last_seen * 1000);
+        const serverAge = snap.server_age_ms || 0;
         if (serverAge > 15000) {
             _lastUpdate = 0;
         } else {
