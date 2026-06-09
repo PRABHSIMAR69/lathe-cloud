@@ -263,6 +263,16 @@ async function fetchLatest() {
 fetchLatest();
 setInterval(fetchLatest, 2000);
 
+setInterval(() => {
+    if (_lastUpdate > 0 && (Date.now() - _lastUpdate > 15000)) {
+        $('#connDot').style.background = '#fc8181';
+        $('#connTxt').textContent = 'Machine Offline';
+        const mb = $('#motorBadge');
+        mb.textContent = 'MACHINE OFF';
+        mb.className = 'badge badge--off';
+    }
+}, 3000);
+
 const fmt = (v, d=1) => (v == null || isNaN(v)) ? '--' : Number(v).toFixed(d);
 
 function renderLatest(L) {
